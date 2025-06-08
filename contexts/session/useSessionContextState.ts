@@ -75,6 +75,127 @@ const useSessionContextState = (): SessionContextState => {
   const [wallpaperImage, setWallpaperImage] = useState(DEFAULT_WALLPAPER);
   const [runHistory, setRunHistory] = useState<string[]>([]);
   const [recentFiles, setRecentFiles] = useState<RecentFiles>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<
+    { isLoggedIn: boolean; name: string } | undefined
+  >();
+  const setAndUpdateIconPositions = useCallback(
+    async (positions: SetStateAction<IconPositions>): Promise<void> => {
+      if (typeof positions === "function") {
+        return setIconPositions(positions);
+      }
+
+      const [firstIcon] = Object.keys(positions) || [];
+      const isDesktop = firstIcon && DESKTOP_PATH === dirname(firstIcon);
+
+      if (isDesktop) {
+        const desktopGrid = document.querySelector("main > ol");
+
+        if (desktopGrid instanceof HTMLOListElement) {
+          try {
+            const { [DESKTOP_PATH]: [desktopFileOrder = []] = [] } =
+              sortOrders || {};
+            const newDesktopSortOrder = {
+              [DESKTOP_PATH]: [
+                [
+                  ...new Set([
+                    ...desktopFileOrder,
+                    ...(await readdir(DESKTOP_PATH)).filter(
+                      (entry) => !SYSTEM_FILES.has(entry)
+                    ),
+                  ]),
+                ],
+              ],
+            } as SortOrders;
+
+            return setIconPositions(
+              updateIconPositionsIfEmpty(
+                DESKTOP_PATH,
+                desktopGrid,
+                positions,
+                newDesktopSortOrder
+              )
+            );
+          } catch {
+            // Ignore failure to update icon positions with directory
+          }
+        }
+      }
+
+      return setIconPositions(positions);
+    },
+    [readdir, sortOrders]
+  );
+  const setSessionValue = useCallback(
+    <K extends keyof SessionData>(key: K, value: SessionData[K]): void => {
+      switch (key) {
+        case "aiEnabled":
+          setAiEnabled(value as boolean);
+          break;
+        case "clockSource":
+          setClockSource(value as SessionData["clockSource"]);
+          break;
+        case "cursor":
+          setCursor(value as string | undefined);
+          break;
+        case "iconPositions":
+          setAndUpdateIconPositions(value as SessionData["iconPositions"]);
+          break;
+        case "isLoggedIn":
+          setIsLoggedIn(value as boolean);
+          break;
+        case "lazySheep":
+          setLazySheep(value as boolean);
+          break;
+        case "recentFiles":
+          setRecentFiles(value as RecentFiles);
+          break;
+        case "runHistory":
+          setRunHistory(value as string[]);
+          break;
+        case "sortOrders":
+          setSortOrders(value as SessionData["sortOrders"]);
+          break;
+        case "themeName":
+          setThemeName(value as SessionData["themeName"]);
+          break;
+        case "user":
+          setUser(value as { isLoggedIn: boolean; name: string } | undefined);
+          break;
+        case "views":
+          setViews(value as SessionData["views"]);
+          break;
+        case "wallpaperFit":
+          setWallpaperFit(value as SessionData["wallpaperFit"]);
+          break;
+        case "wallpaperImage":
+          setWallpaperImage(value as string);
+          break;
+        case "windowStates":
+          setWindowStates(value as SessionData["windowStates"]);
+          break;
+        default:
+          break;
+      }
+    },
+    [
+      setAiEnabled,
+      setClockSource,
+      setCursor,
+      setAndUpdateIconPositions,
+      setIsLoggedIn,
+      setLazySheep,
+      setRecentFiles,
+      setRunHistory,
+      setSortOrders,
+      setThemeName,
+      setUser,
+      setViews,
+      setWallpaperFit,
+      setWallpaperImage,
+      setWindowStates,
+    ]
+  );
   const updateRecentFiles = useCallback(
     async (url: string, pid: string, title?: string): Promise<void> => {
       const ext = getExtension(url);
@@ -159,53 +280,6 @@ const useSessionContextState = (): SessionContextState => {
     []
   );
   const initializedSession = useRef(false);
-  const setAndUpdateIconPositions = useCallback(
-    async (positions: SetStateAction<IconPositions>): Promise<void> => {
-      if (typeof positions === "function") {
-        return setIconPositions(positions);
-      }
-
-      const [firstIcon] = Object.keys(positions) || [];
-      const isDesktop = firstIcon && DESKTOP_PATH === dirname(firstIcon);
-
-      if (isDesktop) {
-        const desktopGrid = document.querySelector("main > ol");
-
-        if (desktopGrid instanceof HTMLOListElement) {
-          try {
-            const { [DESKTOP_PATH]: [desktopFileOrder = []] = [] } =
-              sortOrders || {};
-            const newDesktopSortOrder = {
-              [DESKTOP_PATH]: [
-                [
-                  ...new Set([
-                    ...desktopFileOrder,
-                    ...(await readdir(DESKTOP_PATH)).filter(
-                      (entry) => !SYSTEM_FILES.has(entry)
-                    ),
-                  ]),
-                ],
-              ],
-            } as SortOrders;
-
-            return setIconPositions(
-              updateIconPositionsIfEmpty(
-                DESKTOP_PATH,
-                desktopGrid,
-                positions,
-                newDesktopSortOrder
-              )
-            );
-          } catch {
-            // Ignore failure to update icon positions with directory
-          }
-        }
-      }
-
-      return setIconPositions(positions);
-    },
-    [readdir, sortOrders]
-  );
   const loadingDebounceRef = useRef(0);
 
   useEffect(() => {
@@ -218,11 +292,13 @@ const useSessionContextState = (): SessionContextState => {
             clockSource,
             cursor,
             iconPositions,
+            isLoggedIn,
             lazySheep,
             recentFiles,
             runHistory,
             sortOrders,
             themeName,
+            user,
             views,
             wallpaperFit,
             wallpaperImage,
@@ -238,12 +314,14 @@ const useSessionContextState = (): SessionContextState => {
     cursor,
     haltSession,
     iconPositions,
+    isLoggedIn,
     lazySheep,
     recentFiles,
     runHistory,
     sessionLoaded,
     sortOrders,
     themeName,
+    user,
     views,
     wallpaperFit,
     wallpaperImage,
@@ -282,6 +360,9 @@ const useSessionContextState = (): SessionContextState => {
           if (session.clockSource) setClockSource(session.clockSource);
           if (session.cursor) setCursor(session.cursor);
           if (session.aiEnabled) setAiEnabled(session.aiEnabled);
+          if (typeof session.isLoggedIn === "boolean")
+            {setIsLoggedIn(session.isLoggedIn);}
+          if (session.user) setUser(session.user);
           if (session.themeName) setThemeName(session.themeName);
           if (session.wallpaperImage) {
             setWallpaper(session.wallpaperImage, session.wallpaperFit);
@@ -393,6 +474,7 @@ const useSessionContextState = (): SessionContextState => {
     cursor,
     foregroundId,
     iconPositions,
+    isLoggedIn,
     prependToStack,
     recentFiles,
     removeFromStack,
@@ -405,6 +487,7 @@ const useSessionContextState = (): SessionContextState => {
     setHaltSession,
     setIconPositions: setAndUpdateIconPositions,
     setRunHistory,
+    setSessionValue,
     setSortOrder,
     setThemeName,
     setViews,
@@ -414,6 +497,7 @@ const useSessionContextState = (): SessionContextState => {
     stackOrder,
     themeName,
     updateRecentFiles,
+    user,
     views,
     wallpaperFit,
     wallpaperImage,

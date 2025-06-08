@@ -6,13 +6,12 @@ import SidebarButton, {
 import {
   AllApps,
   Documents,
+  LogOut,
   Pictures,
-  Power,
   SideMenu,
   Videos,
 } from "components/system/StartMenu/Sidebar/SidebarIcons";
 import StyledSidebar from "components/system/StartMenu/Sidebar/StyledSidebar";
-import { useFileSystem } from "contexts/fileSystem";
 import { useProcesses } from "contexts/process";
 import { useSession } from "contexts/session";
 import { HOME, TASKBAR_HEIGHT } from "utils/constants";
@@ -35,9 +34,8 @@ type SidebarProps = {
 };
 
 const Sidebar: FC<SidebarProps> = ({ height }) => {
-  const { rootFs } = useFileSystem();
-  const { open } = useProcesses();
-  const { setHaltSession } = useSession();
+  const { open, processes, close } = useProcesses();
+  const { setSessionValue } = useSession();
   const [collapsed, setCollapsed] = useState(true);
   const expandTimer = useRef(0);
   const sidebarRef = useRef<HTMLElement>(null);
@@ -111,18 +109,24 @@ const Sidebar: FC<SidebarProps> = ({ height }) => {
           : undefined,
         {
           action: () => {
-            setHaltSession(true);
+            // Close all open processes
+            Object.keys(processes).forEach((processId) => {
+              close(processId);
+            });
 
-            import("contexts/fileSystem/functions").then(({ resetStorage }) =>
-              resetStorage(rootFs).finally(() => window.location.reload())
-            );
+            // Set user as logged out
+            setSessionValue("isLoggedIn", false);
+            setSessionValue("user", undefined);
+
+            // Open login screen
+            open("Login");
           },
-          icon: <Power />,
-          name: "Power",
-          tooltip: "Clears session data and reloads the page.",
+          icon: <LogOut />,
+          name: "Log out",
+          tooltip: "Log out and return to login screen.",
         },
       ].filter(Boolean) as SidebarButtons,
-    [buttonAreaCount, collapsed, open, rootFs, setHaltSession]
+    [buttonAreaCount, collapsed, open, processes, close, setSessionValue]
   );
 
   useEffect(() => clearTimer, []);

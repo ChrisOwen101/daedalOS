@@ -7,6 +7,8 @@ import {
   type Relay,
   type Sub,
 } from "nostr-tools";
+import { BOT_PROFILE } from "components/apps/Messenger/botConstants";
+import { botService } from "components/apps/Messenger/botService";
 import { useHistoryContext } from "components/apps/Messenger/HistoryContext";
 import { useMessageContext } from "components/apps/Messenger/MessageContext";
 import { useNostr } from "components/apps/Messenger/NostrContext";
@@ -131,6 +133,8 @@ export const useNostrContacts = (
   const globalContacts = useMemo(
     () =>
       [
+        // Add the bot as a global contact
+        botService.getBotPublicKey(),
         ...(PACKAGE_DATA?.author?.npub
           ? new Set([
               toHexKey(PACKAGE_DATA.author.npub),
@@ -231,11 +235,23 @@ export const useNostrProfile = (
   isVisible = true
 ): NostrProfile => {
   const { profiles, setProfiles } = useHistoryContext();
+
+  // Handle bot profile specially
+  useEffect(() => {
+    if (publicKey === botService.getBotPublicKey() && !profiles[publicKey]) {
+      setProfiles((currentProfiles) => ({
+        ...currentProfiles,
+        [publicKey]: dataToProfile(publicKey, BOT_PROFILE, Date.now() / 1000),
+      }));
+    }
+  }, [profiles, publicKey, setProfiles]);
+
   const onEvent = useCallback(
     ({ content, created_at, pubkey }: NostrEvent) => {
       if (
         !publicKey ||
         publicKey !== pubkey ||
+        pubkey === botService.getBotPublicKey() || // Don't override bot profile
         (profiles?.[publicKey]?.created_at as number) >= created_at
       ) {
         return;
@@ -258,7 +274,8 @@ export const useNostrProfile = (
   );
   const profileFilter = useMemo(
     () => ({
-      enabled: !!publicKey && isVisible,
+      enabled:
+        !!publicKey && isVisible && publicKey !== botService.getBotPublicKey(),
       filter: [
         {
           authors: [publicKey],

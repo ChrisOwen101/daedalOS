@@ -1,5 +1,4 @@
 import { memo } from "react";
-import { useTheme } from "styled-components";
 
 export const AllApps = memo(() => (
   <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
@@ -19,19 +18,11 @@ export const Documents = memo(() => (
   </svg>
 ));
 
-export const Power = memo(() => {
-  const { colors } = useTheme();
-
-  return (
-    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M17 16h-2V0h2v16zm3.313-11.312q2.156.688 3.945 2t3.063 3.078 1.977 3.875.703 4.359q0 1.938-.5 3.727t-1.414 3.344-2.188 2.828-2.828 2.188-3.344 1.414-3.727.5-3.727-.5-3.344-1.414-2.828-2.188-2.188-2.828-1.414-3.344-.5-3.727q0-2.25.703-4.359t1.977-3.875 3.063-3.078 3.945-2l.625 1.891q-1.859.609-3.391 1.734t-2.625 2.625-1.695 3.305-.602 3.758q0 1.656.43 3.188t1.211 2.867 1.875 2.43 2.43 1.875 2.867 1.211 3.188.43 3.188-.43 2.867-1.211 2.43-1.875 1.875-2.43 1.211-2.867.43-3.188q0-1.953-.602-3.758t-1.695-3.305-2.625-2.625-3.391-1.734z"
-        stroke={colors.text}
-        strokeWidth="1"
-      />
-    </svg>
-  );
-});
+export const LogOut = memo(() => (
+  <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <path d="M6 30h14V16h2v16H4V0h18v16h-2V2H6v28zm12-11V9h-2v10h2zm10-3l-8-8v6H10v4h10v6l8-8z" />
+  </svg>
+));
 
 export const Pictures = memo(() => (
   <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">

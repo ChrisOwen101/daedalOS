@@ -121,6 +121,20 @@ const directory: Processes = {
     lockAspectRatio: true,
     title: "js-dos v7",
   },
+  Login: {
+    Component: dynamic(() => import("components/apps/Login")),
+    allowResizing: false,
+    backgroundColor: "transparent",
+    defaultSize: {
+      height: 500,
+      width: 400,
+    },
+    hideMaximizeButton: true,
+    hideMinimizeButton: true,
+    icon: "/System/Icons/user.webp",
+    singleton: true,
+    title: "Login",
+  },
   Marked: {
     Component: dynamic(() => import("components/apps/Marked")),
     backgroundColor: "#FFF",

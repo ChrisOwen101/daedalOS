@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { type Event } from "nostr-tools";
+import { botService } from "components/apps/Messenger/botService";
 import { useHistoryContext } from "components/apps/Messenger/HistoryContext";
 import {
   getKeyFromTags,
@@ -94,13 +95,32 @@ export const MessageProvider = memo<FC<MessageProviderProps>>(
   ({ children, publicKey, since }) => {
     const chatEvents = useNostrEvents(getMessages(publicKey, "", since));
     const { outgoingEvents, setOutgoingEvents } = useHistoryContext();
+    const [botMessages, setBotMessages] = useState<Event[]>([]);
+
     const sendingEvent = useCallback(
-      (event: Event) =>
+      (event: Event) => {
         setOutgoingEvents((currentOutgoingEvents) => [
           ...currentOutgoingEvents,
           event,
-        ]),
-      [setOutgoingEvents]
+        ]);
+
+        // Check if this is a message to the bot
+        const recipientKey = getKeyFromTags(event.tags);
+        if (recipientKey === botService.getBotPublicKey()) {
+          // Generate bot response
+          botService.generateResponse(
+            event.content,
+            publicKey,
+            (responseEvent: Event) => {
+              setBotMessages((currentBotMessages) => [
+                ...currentBotMessages,
+                responseEvent,
+              ]);
+            }
+          );
+        }
+      },
+      [publicKey, setOutgoingEvents]
     );
     const [events, setEvents] = useState<Event[]>(chatEvents);
 
@@ -110,10 +130,11 @@ export const MessageProvider = memo<FC<MessageProviderProps>>(
         ...outgoingEvents.filter(
           (event) => !chatEvents.some(({ id }) => id === event.id)
         ),
+        ...botMessages,
       ];
 
       if (currentEvents.length !== events.length) setEvents(currentEvents);
-    }, [chatEvents, events, outgoingEvents]);
+    }, [botMessages, chatEvents, events, outgoingEvents]);
 
     useEffect(() => {
       outgoingEvents.forEach((message) => {

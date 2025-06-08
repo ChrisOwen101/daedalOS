@@ -43,11 +43,13 @@ export type SessionData = {
   clockSource: ClockSource;
   cursor: string | undefined;
   iconPositions: IconPositions;
+  isLoggedIn?: boolean;
   lazySheep?: boolean;
   recentFiles: RecentFiles;
   runHistory: string[];
   sortOrders: SortOrders;
   themeName: ThemeName;
+  user?: { isLoggedIn: boolean; name: string };
   views: Views;
   wallpaperFit: WallpaperFit;
   wallpaperImage: string;
@@ -66,6 +68,10 @@ export type SessionContextState = SessionData & {
   setHaltSession: React.Dispatch<React.SetStateAction<boolean>>;
   setIconPositions: React.Dispatch<React.SetStateAction<IconPositions>>;
   setRunHistory: React.Dispatch<React.SetStateAction<string[]>>;
+  setSessionValue: <K extends keyof SessionData>(
+    key: K,
+    value: SessionData[K]
+  ) => void;
   setSortOrder: (
     directory: string,
     order: string[] | ((currentSortOrder: string[]) => string[]),

@@ -4,6 +4,7 @@ import Metadata from "components/pages/Metadata";
 import StyledApp from "components/pages/StyledApp";
 import { FileSystemProvider } from "contexts/fileSystem";
 import { MenuProvider } from "contexts/menu";
+import { NotificationProvider } from "contexts/notification";
 import { ProcessProvider } from "contexts/process";
 import { SessionProvider } from "contexts/session";
 import { ViewportProvider } from "contexts/viewport";
@@ -13,14 +14,16 @@ const App = ({ Component: Index, pageProps }: AppProps): React.ReactElement => (
     <ProcessProvider>
       <FileSystemProvider>
         <SessionProvider>
-          <ErrorBoundary>
-            <Metadata />
-            <StyledApp>
-              <MenuProvider>
-                <Index {...pageProps} />
-              </MenuProvider>
-            </StyledApp>
-          </ErrorBoundary>
+          <NotificationProvider>
+            <ErrorBoundary>
+              <Metadata />
+              <StyledApp>
+                <MenuProvider>
+                  <Index {...pageProps} />
+                </MenuProvider>
+              </StyledApp>
+            </ErrorBoundary>
+          </NotificationProvider>
         </SessionProvider>
       </FileSystemProvider>
     </ProcessProvider>
