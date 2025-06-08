@@ -1,25 +1,25 @@
-import { memo, useEffect } from "react";
-import AppsLoader from "components/system/Apps/AppsLoader";
-import Desktop from "components/system/Desktop";
-import Taskbar from "components/system/Taskbar";
-import { useSession } from "contexts/session";
-import useGlobalErrorHandler from "hooks/useGlobalErrorHandler";
-import useGlobalKeyboardShortcuts from "hooks/useGlobalKeyboardShortcuts";
-import useIFrameFocuser from "hooks/useIFrameFocuser";
-import useUrlLoader from "hooks/useUrlLoader";
-import { notifications } from "utils/notifications";
+import { memo, useEffect } from "react"
+import AppsLoader from "components/system/Apps/AppsLoader"
+import Desktop from "components/system/Desktop"
+import Taskbar from "components/system/Taskbar"
+import { useSession } from "contexts/session"
+import useGlobalErrorHandler from "hooks/useGlobalErrorHandler"
+import useGlobalKeyboardShortcuts from "hooks/useGlobalKeyboardShortcuts"
+import useIFrameFocuser from "hooks/useIFrameFocuser"
+import useUrlLoader from "hooks/useUrlLoader"
+import { notifications } from "utils/notifications"
 
 const Index = (): React.ReactElement => {
-  const { isLoggedIn, sessionLoaded } = useSession();
+  const { isLoggedIn, sessionLoaded } = useSession()
 
-  useIFrameFocuser();
-  useUrlLoader();
-  useGlobalKeyboardShortcuts();
-  useGlobalErrorHandler();
+  useIFrameFocuser()
+  useUrlLoader()
+  useGlobalKeyboardShortcuts()
+  useGlobalErrorHandler()
 
   // Add welcome notification 5 seconds after launch
   useEffect(() => {
-    if (!sessionLoaded || !isLoggedIn) return;
+    if (!sessionLoaded || !isLoggedIn) return
 
     const timer = setTimeout(() => {
       notifications.app(
@@ -28,12 +28,36 @@ const Index = (): React.ReactElement => {
         "Your desktop environment is ready. Click to open File Explorer.",
         { url: "/" },
         "info"
-      );
-    }, 5000);
+      )
+
+      notifications.app(
+        "Message received!",
+        "Messenger",
+        "Messenger is now available. Click to open.",
+        { url: "/" },
+        "info"
+      )
+
+      notifications.app(
+        "Message received!",
+        "Messenger",
+        "Messenger is now available. Click to open.",
+        { url: "/" },
+        "info"
+      )
+
+      notifications.app(
+        "Message received!",
+        "Messenger",
+        "Messenger is now available. Click to open.",
+        { url: "/" },
+        "info"
+      )
+    }, 5000)
 
     // eslint-disable-next-line consistent-return
-    return () => clearTimeout(timer);
-  }, [sessionLoaded, isLoggedIn]);
+    return () => clearTimeout(timer)
+  }, [sessionLoaded, isLoggedIn])
 
   return sessionLoaded && isLoggedIn ? (
     <Desktop>
@@ -50,7 +74,7 @@ const Index = (): React.ReactElement => {
     >
       <AppsLoader />
     </div>
-  );
-};
+  )
+}
 
-export default memo(Index);
+export default memo(Index)
