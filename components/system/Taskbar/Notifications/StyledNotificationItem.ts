@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { type NotificationPriority } from "contexts/notification/types";
 
 type StyledNotificationItemProps = {
+  $clickable?: boolean;
   $priority: NotificationPriority;
   $type: "info" | "warning" | "error" | "success";
 };
@@ -23,12 +24,14 @@ const StyledNotificationItem = styled.div<StyledNotificationItemProps>`
       }
     }};
   border-radius: 6px;
+  cursor: ${({ $clickable }) => ($clickable ? "pointer" : "default")};
   margin-bottom: 8px;
   padding: 12px;
   transition: all 0.15s ease;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.taskbar.hover};
+    background: ${({ $clickable, theme }) => 
+      $clickable ? theme.colors.taskbar.active : theme.colors.taskbar.hover};
   }
 
   &:last-child {
@@ -76,6 +79,14 @@ const StyledNotificationItem = styled.div<StyledNotificationItemProps>`
       line-height: 1.4;
       margin: 0 0 8px 0;
       opacity: 0.8;
+    }
+
+    .notification-app-hint {
+      color: ${({ theme }) => theme.colors.selectionHighlight};
+      font-size: 11px;
+      font-style: italic;
+      margin: 4px 0 8px 0;
+      opacity: 0.7;
     }
 
     .notification-meta {

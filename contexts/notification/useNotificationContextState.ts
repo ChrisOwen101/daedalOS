@@ -4,6 +4,7 @@ import {
   type NotificationContextState,
 } from "contexts/notification/types";
 import { notifications as globalNotifications } from "utils/notifications";
+import { playSystemSound, SYSTEM_SOUNDS } from "utils/audio";
 
 const useNotificationContextState = (): NotificationContextState => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -21,6 +22,9 @@ const useNotificationContextState = (): NotificationContextState => {
         newNotification,
         ...currentNotifications,
       ]);
+
+      // Play notification sound when notification is added
+      playSystemSound(SYSTEM_SOUNDS.notification);
 
       return id;
     },

@@ -8,6 +8,8 @@ export interface NotificationAction {
 
 export interface Notification {
   actions?: NotificationAction[];
+  appId?: string;
+  appArguments?: Record<string, unknown>;
   body?: string;
   id: string;
   priority: NotificationPriority;

@@ -22,21 +22,12 @@ const Index = (): React.ReactElement => {
     if (!sessionLoaded || !isLoggedIn) return;
 
     const timer = setTimeout(() => {
-      notifications.info(
+      notifications.app(
         "Welcome to daedalOS!",
-        "Your desktop environment is ready. Click here to explore features.",
-        [
-          {
-            id: "explore",
-            label: "Explore",
-            onClick: (): void => {
-              notifications.info(
-                "Feature Explorer",
-                "Check out the apps in the start menu!"
-              );
-            },
-          },
-        ]
+        "FileExplorer",
+        "Your desktop environment is ready. Click to open File Explorer.",
+        { url: "/" },
+        "info"
       );
     }, 5000);
 

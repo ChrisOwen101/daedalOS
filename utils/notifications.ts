@@ -20,6 +20,8 @@ class NotificationManager {
   // Public API for programmers to add notifications
   public add(options: {
     actions?: NotificationAction[]
+    appArguments?: Record<string, unknown>
+    appId?: string
     body?: string
     priority?: NotificationPriority
     title: string
@@ -101,6 +103,24 @@ class NotificationManager {
       priority: "medium",
       title: `🤖 ${title}`,
       type: "info",
+    })
+  }
+
+  // App notification - creates a notification that opens an app when clicked
+  public app(
+    title: string,
+    appId: string,
+    body?: string,
+    appArguments?: Record<string, unknown>,
+    type: "info" | "warning" | "error" | "success" = "info"
+  ): string | undefined {
+    return this.add({
+      appArguments,
+      appId,
+      body,
+      priority: type === "error" ? "critical" : type === "warning" ? "high" : "medium",
+      title,
+      type,
     })
   }
 }

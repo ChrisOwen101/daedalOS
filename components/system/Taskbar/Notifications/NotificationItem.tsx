@@ -1,62 +1,80 @@
-import { memo, type FC, useEffect } from "react";
-import StyledNotificationItem from "components/system/Taskbar/Notifications/StyledNotificationItem";
-import { type Notification } from "contexts/notification/types";
-import { useNotification } from "contexts/notification";
-import { playSystemSound, SYSTEM_SOUNDS } from "utils/audio";
+import { memo, type FC } from "react"
+import StyledNotificationItem from "components/system/Taskbar/Notifications/StyledNotificationItem"
+import { type Notification } from "contexts/notification/types"
+import { useNotification } from "contexts/notification"
+import { useProcesses } from "contexts/process"
 
 const formatTime = (time: number): string => {
-  const now = Date.now();
-  const diff = now - time;
-  const minutes = Math.floor(diff / (1000 * 60));
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const now = Date.now()
+  const diff = now - time
+  const minutes = Math.floor(diff / (1000 * 60))
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
 
-  if (minutes < 1) return "now";
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  return `${days}d ago`;
-};
+  if (minutes < 1) return "now"
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  return `${days}d ago`
+}
 
 type NotificationItemProps = {
-  notification: Notification;
-};
+  notification: Notification
+}
 
 const NotificationItem: FC<NotificationItemProps> = ({ notification }) => {
-  const { removeNotification } = useNotification();
+  const { removeNotification } = useNotification()
+  const { open } = useProcesses()
   const {
     actions,
+    appId,
+    appArguments,
     body,
     id,
     priority,
     timestamp,
     title,
     type = "info",
-  } = notification;
-
-  // Play sound when notification appears
-  useEffect(() => {
-    playSystemSound(SYSTEM_SOUNDS.notification);
-  }, []);
+  } = notification
 
   const handleRemove = (): void => {
-    removeNotification(id);
-  };
+    removeNotification(id)
+  }
+
+  const handleNotificationClick = (): void => {
+    if (appId) {
+      open(appId, appArguments)
+      removeNotification(id)
+    }
+  }
 
   return (
-    <StyledNotificationItem $priority={priority} $type={type}>
+    <StyledNotificationItem 
+      $priority={priority} 
+      $type={type}
+      $clickable={Boolean(appId)}
+      onClick={handleNotificationClick}
+    >
       <div className="notification-content">
         <div className="notification-main">
           <h4>{title}</h4>
           <button
             aria-label="Remove notification"
             className="remove-button"
-            onClick={handleRemove}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleRemove()
+            }}
             type="button"
           >
             ×
           </button>
         </div>
         {body && <p>{body}</p>}
+        {appId && (
+          <div className="notification-app-hint">
+            Click to open application
+          </div>
+        )}
         <div className="notification-meta">
           <span className="timestamp">{formatTime(timestamp)}</span>
           {priority !== "medium" && (
@@ -71,9 +89,10 @@ const NotificationItem: FC<NotificationItemProps> = ({ notification }) => {
               <button
                 key={action.id}
                 className="action-button"
-                onClick={() => {
-                  action.onClick();
-                  handleRemove();
+                onClick={(e) => {
+                  e.stopPropagation()
+                  action.onClick()
+                  handleRemove()
                 }}
                 type="button"
               >
@@ -84,7 +103,7 @@ const NotificationItem: FC<NotificationItemProps> = ({ notification }) => {
         )}
       </div>
     </StyledNotificationItem>
-  );
-};
+  )
+}
 
-export default memo(NotificationItem);
+export default memo(NotificationItem)
