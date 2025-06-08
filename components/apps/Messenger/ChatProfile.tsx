@@ -1,29 +1,29 @@
-import { useRef } from "react";
 import Profile from "components/apps/Messenger/Profile";
 import StyledChatProfile from "components/apps/Messenger/StyledChatProfile";
-import { useNostrProfile } from "components/apps/Messenger/hooks";
-import { useIsVisible } from "hooks/useIsVisible";
 
-const ChatProfile: FC<{ publicKey: string }> = ({ publicKey }) => {
-  const elementRef = useRef<HTMLLIElement | null>(null);
-  const isVisible = useIsVisible(elementRef);
-  const { about, nip05, picture, userName } = useNostrProfile(
-    publicKey,
-    isVisible
-  );
+type ChatProfileProps = {
+  customerId: string;
+  customerName: string;
+};
+
+const ChatProfile: FC<ChatProfileProps> = ({ customerId, customerName }) => {
+  const customerInfo = {
+    customer_1: "Customer since 2023 • Premium member • Order #12345",
+    customer_2: "Customer since 2022 • Standard member • Payment issue",
+    customer_3: "Customer since 2021 • VIP member • Missing item resolved",
+  }[customerId] || "Customer information";
 
   return (
-    <StyledChatProfile ref={elementRef}>
+    <StyledChatProfile>
       <Profile
-        nip05={nip05}
-        picture={picture}
-        pubkey={publicKey}
-        userName={userName}
+        customerId={customerId}
+        picture="/System/Icons/user.webp"
+        userName={customerName}
       >
-        {about && <div className="about">{about}</div>}
+        <div className="about">{customerInfo}</div>
         <div className="encryption">
-          <span>🔐 End-to-end encrypted</span>
-          <span>Messages are secured with AES256-CBC encryption.</span>
+          <span>🛡️ Secure customer support</span>
+          <span>All conversations are logged for quality assurance.</span>
         </div>
       </Profile>
     </StyledChatProfile>

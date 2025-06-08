@@ -12,6 +12,7 @@ export const SYSTEM_SOUNDS = {
 // Audio context for managing autoplay permissions
 class AudioManager {
   private audioEnabled = false;
+
   private initializePromise: Promise<void> | null = null;
 
   public async initialize(): Promise<void> {
@@ -81,6 +82,4 @@ class AudioManager {
 
 const audioManager = new AudioManager();
 
-export const playSystemSound = async (soundPath: string): Promise<void> => {
-  return audioManager.playSound(soundPath);
-};
+export const playSystemSound = async (soundPath: string): Promise<void> => audioManager.playSound(soundPath);

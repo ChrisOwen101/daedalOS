@@ -1,6 +1,6 @@
-import dynamic from "next/dynamic";
-import { type Processes } from "contexts/process/types";
-import { FOLDER_ICON, TASKBAR_HEIGHT } from "utils/constants";
+import dynamic from "next/dynamic"
+import { type Processes } from "contexts/process/types"
+import { FOLDER_ICON, TASKBAR_HEIGHT } from "utils/constants"
 
 const directory: Processes = {
   BoxedWine: {
@@ -158,7 +158,7 @@ const directory: Processes = {
     },
     icon: "/System/Icons/messenger.webp",
     singleton: true,
-    title: "Messenger",
+    title: "Customer Service",
   },
   MonacoEditor: {
     Component: dynamic(() => import("components/apps/MonacoEditor")),
@@ -421,6 +421,6 @@ const directory: Processes = {
     singleton: true,
     title: "Webamp",
   },
-};
+}
 
-export default directory;
+export default directory

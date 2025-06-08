@@ -1,99 +1,55 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { type Event } from "nostr-tools";
+import { useEffect, useState } from "react";
 import Profile from "components/apps/Messenger/Profile";
-import {
-  copyKeyMenuItems,
-  decryptMessage,
-  shortTimeStamp,
-} from "components/apps/Messenger/functions";
-import { useNostrProfile } from "components/apps/Messenger/hooks";
-import { useMenu } from "contexts/menu";
+import { shortTimeStamp } from "components/apps/Messenger/functions";
 import Button from "styles/common/Button";
-import { MENU_SEPERATOR, MILLISECONDS_IN_MINUTE } from "utils/constants";
-import { useIsVisible } from "hooks/useIsVisible";
+import { MILLISECONDS_IN_MINUTE } from "utils/constants";
 
-type ContactProps = {
-  lastEvent: Event;
-  onClick: () => void;
-  pubkey: string;
-  publicKey: string;
-  unreadEvent: boolean;
+type Customer = {
+  avatar: string;
+  id: string;
+  lastMessage: string;
+  name: string;
+  status: string;
+  timestamp: number;
+  unread: boolean;
 };
 
-const Contact: FC<ContactProps> = ({
-  lastEvent,
-  onClick,
-  pubkey,
-  publicKey,
-  unreadEvent,
-}) => {
-  const {
-    content = "",
-    created_at = 0,
-    id,
-    pubkey: eventPubkey,
-  } = lastEvent || {};
-  const [decryptedContent, setDecryptedContent] = useState("");
-  const [timeStamp, setTimeStamp] = useState("");
-  const elementRef = useRef<HTMLLIElement | null>(null);
-  const isVisible = useIsVisible(elementRef);
-  const { nip05, picture, userName } = useNostrProfile(pubkey, isVisible);
-  const unreadClass = unreadEvent ? "unread" : undefined;
-  const { contextMenu } = useMenu();
-  const { onContextMenuCapture } = useMemo(
-    () =>
-      contextMenu?.(() => [
-        {
-          action: onClick,
-          icon: "🔐",
-          label: "Start end-to-end encrypted chat",
-        },
-        MENU_SEPERATOR,
-        ...copyKeyMenuItems(pubkey),
-      ]),
-    [contextMenu, onClick, pubkey]
-  );
+type ContactProps = {
+  customer: Customer;
+  onClick: () => void;
+};
 
-  useEffect(() => {
-    if (content && isVisible) {
-      decryptMessage(id, content, pubkey).then(
-        (message) => message && setDecryptedContent(message)
-      );
-    }
-  }, [content, id, isVisible, pubkey]);
+const Contact: FC<ContactProps> = ({ customer, onClick }) => {
+  const [timeStamp, setTimeStamp] = useState("");
+  const unreadClass = customer.unread ? "unread" : undefined;
+  const statusIcon = customer.status === "active" ? "🟢" : customer.status === "waiting" ? "🟡" : "⚪";
 
   useEffect(() => {
     let interval = 0;
 
-    if (created_at) {
-      setTimeStamp(shortTimeStamp(created_at));
-
-      interval = window.setInterval(
-        () => setTimeStamp(shortTimeStamp(created_at)),
-        MILLISECONDS_IN_MINUTE
-      );
+    if (customer.timestamp) {
+      const updateTimestamp = (): void => {
+        setTimeStamp(shortTimeStamp(Math.floor(customer.timestamp / 1000)));
+      };
+      
+      updateTimestamp();
+      interval = window.setInterval(updateTimestamp, MILLISECONDS_IN_MINUTE);
     }
 
     return () => window.clearInterval(interval);
-  }, [created_at]);
+  }, [customer.timestamp]);
 
   return (
-    <li
-      ref={elementRef}
-      className={unreadClass}
-      onContextMenuCapture={onContextMenuCapture}
-    >
+    <li className={unreadClass}>
       <Button onClick={onClick}>
         <Profile
-          nip05={nip05}
-          picture={picture}
-          pubkey={pubkey}
-          userName={userName}
+          customerId={customer.id}
+          picture={customer.avatar}
+          userName={customer.name}
         >
           <div>
             <div className={unreadClass}>
-              {eventPubkey === publicKey ? "You: " : ""}
-              {decryptedContent || content}
+              {statusIcon} {customer.lastMessage}
             </div>
             {timeStamp ? "·" : ""}
             <div>{timeStamp}</div>

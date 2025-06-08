@@ -49,9 +49,9 @@ const NotificationItem: FC<NotificationItemProps> = ({ notification }) => {
 
   return (
     <StyledNotificationItem 
-      $priority={priority} 
+      $clickable={Boolean(appId)} 
+      $priority={priority}
       $type={type}
-      $clickable={Boolean(appId)}
       onClick={handleNotificationClick}
     >
       <div className="notification-content">

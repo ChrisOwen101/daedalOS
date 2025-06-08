@@ -1,25 +1,21 @@
 import { useState } from "react";
-import { Avatar, Verified } from "components/apps/Messenger/Icons";
+import { Avatar } from "components/apps/Messenger/Icons";
 import StyledProfile from "components/apps/Messenger/StyledProfile";
-import { useNip05Domain } from "components/apps/Messenger/hooks";
 
 type ProfileProps = {
-  nip05?: string;
+  customerId?: string;
   onMouseDown?: () => void;
   picture?: string;
-  pubkey?: string;
   userName?: string;
 };
 
 const Profile: FC<ProfileProps> = ({
   children,
-  nip05,
+  customerId: _customerId,
   onMouseDown,
   picture,
-  pubkey,
-  userName = "Unknown",
+  userName = "Unknown Customer",
 }) => {
-  const verifiedDomain = useNip05Domain(nip05, pubkey);
   const [loadedImage, setLoadedImage] = useState("");
 
   return (
@@ -39,11 +35,6 @@ const Profile: FC<ProfileProps> = ({
           />
         )}
         {(!picture || loadedImage !== picture) && <Avatar />}
-        {verifiedDomain && (
-          <div className="verified" title={verifiedDomain}>
-            <Verified />
-          </div>
-        )}
       </div>
       <figcaption>
         <span>{userName}</span>

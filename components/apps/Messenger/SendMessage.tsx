@@ -1,38 +1,45 @@
 import { useCallback, useRef, useState } from "react";
 import { Send } from "components/apps/Messenger/Icons";
-import { useMessageContext } from "components/apps/Messenger/MessageContext";
-import { useNostr } from "components/apps/Messenger/NostrContext";
 import StyledSendMessage from "components/apps/Messenger/StyledSendMessage";
-import { UNKNOWN_PUBLIC_KEY } from "components/apps/Messenger/constants";
-import { createMessageEvent } from "components/apps/Messenger/functions";
 import Button from "styles/common/Button";
 import { haltEvent } from "utils/functions";
 
-const SendMessage: FC<{ recipientPublicKey: string }> = ({
-  recipientPublicKey,
-}) => {
-  const { sendingEvent } = useMessageContext();
-  const { publish } = useNostr();
+// Simulated customer service responses
+const AUTOMATED_RESPONSES = [
+  "Thank you for contacting us. Let me look into that for you.",
+  "I understand your concern. I'll check on that right away.",
+  "I've located your account information. Here's what I can see...",
+  "I've processed that request for you. You should see the changes shortly.",
+  "Is there anything else I can help you with today?",
+  "Thank you for being a valued customer. Have a great day!",
+];
+
+const SendMessage: FC<{ customerId: string }> = ({ customerId }) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [canSend, setCanSend] = useState(false);
-  const isUnknownKey = recipientPublicKey === UNKNOWN_PUBLIC_KEY;
+  
   const sendMessage = useCallback(
-    async (message: string) => {
-      const event = await createMessageEvent(message, recipientPublicKey);
-
-      sendingEvent(event);
-
-      try {
-        publish(event);
-      } catch {
-        // Ignore error during publish
+    (message: string) => {
+      // Simulate sending the message (for demo purposes)
+      // In a real app, this would send to a backend service
+      if (message && customerId) {
+        // Message would be sent here
       }
-
+      
       if (inputRef.current?.value) inputRef.current.value = "";
-
       setCanSend(false);
+      
+      // Simulate customer response after a short delay
+      setTimeout(() => {
+        const responseIndex = Math.floor(Math.random() * AUTOMATED_RESPONSES.length);
+        const response = AUTOMATED_RESPONSES[responseIndex];
+        // In a real app, this would be handled by the backend
+        if (response) {
+          // Response would be displayed here
+        }
+      }, 2000 + Math.random() * 3000);
     },
-    [publish, recipientPublicKey, sendingEvent]
+    [customerId]
   );
   const updateHeight = useCallback(() => {
     if (inputRef.current) {
@@ -48,27 +55,26 @@ const SendMessage: FC<{ recipientPublicKey: string }> = ({
     <StyledSendMessage>
       <textarea
         ref={inputRef}
-        disabled={isUnknownKey}
         onChange={() => {
           setCanSend(Boolean(inputRef.current?.value));
           updateHeight();
         }}
-        onKeyDown={async (event) => {
+        onKeyDown={(event) => {
           const { key, shiftKey } = event;
           const message = inputRef.current?.value.trim();
 
           if (message && key === "Enter" && !shiftKey) {
             event.preventDefault();
-            await sendMessage(message);
+            sendMessage(message);
           } else setCanSend(Boolean(message));
 
           updateHeight();
         }}
-        placeholder="Type a message..."
+        placeholder="Type your response to the customer..."
         autoFocus
       />
       <Button
-        disabled={isUnknownKey || !canSend}
+        disabled={!canSend}
         onClick={() =>
           inputRef.current?.value && sendMessage(inputRef.current.value)
         }
